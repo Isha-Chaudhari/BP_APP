@@ -4,6 +4,8 @@ import numpy as np
 import scipy.signal as sig
 import cloudinary
 import cloudinary.uploader
+import cloudinary.config
+import requests
 
 app = Flask(__name__)
 
@@ -45,7 +47,7 @@ def calculate_blood_pressure(ppg_data):
 @app.route("/", methods=['POST'])
 def process_video():
     try:
-        data = request.get_json()
+        data = request.json()
         video_url = data.get('video_url')
 
         if not video_url:
@@ -59,8 +61,7 @@ def process_video():
         print_count = 0
         ppg_data = []
 
-        with open("out.txt", 'w') as file:
-            while print_count < 500:
+        while print_count < 500:
                 ret, frame = cap.read()
                 if not ret:
                     break
@@ -68,11 +69,6 @@ def process_video():
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 mean_brightness = cv2.mean(gray)[0]
                 ppg_data.append(mean_brightness)
-
-                if print_count == 499:
-                    file.write("{:.2f}".format(mean_brightness))
-                else:
-                    file.write("{:.2f},".format(mean_brightness))
 
                 print_count += 1
 
